@@ -1,6 +1,7 @@
+import json
 from datetime import datetime
 from os.path import dirname, join
-import json
+
 import pytest
 from city_scrapers_core.constants import NOT_CLASSIFIED
 from city_scrapers_core.utils import file_response
@@ -31,12 +32,16 @@ freezer.stop()
 Uncomment below
 """
 
+
 def test_title():
     assert parsed_items[0]["title"] == "City Planning Commission"
 
 
 def test_description():
-    assert parsed_items[0]["description"] == "CITY PLANNING COMMISSION\r\nREGULAR MEETING AGENDA"
+    assert (
+        parsed_items[0]["description"]
+        == "CITY PLANNING COMMISSION\r\nREGULAR MEETING AGENDA"
+    )
 
 
 def test_start():
@@ -62,19 +67,32 @@ def test_status():
 def test_location():
     assert parsed_items[0]["location"] == {
         "name": "",
-        "address":['1101 West Ventura Boulevard', '1515 South Veteran Avenue', '1523 South Veteran Avenue', '1666 North Vermont Avenue', '1642 – 1666 North Vermont Avenue', '4646 – 4650 West Prospect Avenue', '4685 – 4697 West Hollywood Boulevard']
+        "address": [
+            "1101 West Ventura Boulevard",
+            "1515 South Veteran Avenue",
+            "1523 South Veteran Avenue",
+            "1666 North Vermont Avenue",
+            "1642 – 1666 North Vermont Avenue",
+            "4646 – 4650 West Prospect Avenue",
+            "4685 – 4697 West Hollywood Boulevard",
+        ],
     }
 
 
 def test_source():
-    assert parsed_items[0]["source"] == 'https://planning.lacity.gov/dcpapi/meetings/api/all/commissions/2024'
+    assert (
+        parsed_items[0]["source"]
+        == "https://planning.lacity.gov/dcpapi/meetings/api/all/commissions/2024"
+    )
 
 
 def test_links():
-    assert parsed_items[0]["links"] == [{
-      "href": "http://planning.lacity.gov/dcpapi/meetings/document/77621",
-     "title": "77621"
-    }] 
+    assert parsed_items[0]["links"] == [
+        {
+            "href": "http://planning.lacity.gov/dcpapi/meetings/document/77621",
+            "title": "77621",
+        }
+    ]
 
 
 def test_classification():
