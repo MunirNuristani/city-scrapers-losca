@@ -31,7 +31,8 @@ class LoscaHealthCommissionSpider(CityScrapersSpider):
             for item in items:
                 required_fields = ['title', 'dateTime', 'videoUrl', 'documentList']
                 if not all(field in item for field in required_fields):
-                    self.logger.warning(f"Missing required fields in item: {item}")
+                    missing_fields = [field for field in required_fields if field not in item]
+                    self.logger.warning(f"Missing required fields {missing_fields} in item with id {item.get('id', 'N/A')}")
                     continue
                 
                 meeting = Meeting(
