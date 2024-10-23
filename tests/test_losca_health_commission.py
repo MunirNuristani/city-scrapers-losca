@@ -21,12 +21,6 @@ parsed_items = [item for item in spider.parse(test_response)]
 
 freezer.stop()
 
-
-# def test_tests():
-#     print("Please write some tests for this spider or at least disable this one.")
-#     assert True
-
-
 def test_title():
     assert parsed_items[0]["title"] == "Los Angeles City Health Commission"
 
@@ -88,3 +82,7 @@ def test_classification():
 @pytest.mark.parametrize("item", parsed_items)
 def test_all_day(item):
     assert item["all_day"] is False
+
+
+def test_parsed_items_count():
+    assert len(parsed_items) == 10  # Adjust the expected count based on your test data
