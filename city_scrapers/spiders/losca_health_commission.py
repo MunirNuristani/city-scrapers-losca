@@ -104,16 +104,22 @@ class LoscaHealthCommissionSpider(CityScrapersSpider):
             1: "https://lacity.primegov.com/Public/CompiledDocument?meetingTemplateId={}&compileOutputType=1"
         }
         data = []
-        data.append({
-            "href": item["videoUrl"],
-            "title": "videoLink"
-        })
-        for document in item["documentList"]:
-            output_type = document["compileOutputType"]
-            if output_type in COMPILE_OUTPUT_TYPES:
+        if item.get("videoUrl"):
+            data.append({
+                "href": item["videoUrl"],
+                "title": "Video Link"
+            })
+
+        for document in item.get("documentList", []):
+            if not document:
+                continue
+            output_type = document.get("compileOutputType")
+            template_id = document.get("templateId")
+            template_name = document.get("templateName")
+            if output_type in COMPILE_OUTPUT_TYPES and template_id and template_name:
                 data.append({
-                    "href": COMPILE_OUTPUT_TYPES[output_type].format(document["templateId"]),
-                    "title": document["templateName"]
+                    "href": COMPILE_OUTPUT_TYPES[output_type].format(template_id),
+                    "title": template_name
                 })
         return data
 
