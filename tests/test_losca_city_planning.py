@@ -2,7 +2,7 @@ from datetime import datetime
 from os.path import dirname, join
 
 import pytest
-from city_scrapers_core.constants import NOT_CLASSIFIED
+from city_scrapers_core.constants import COMMISSION
 from city_scrapers_core.utils import file_response
 from freezegun import freeze_time
 
@@ -13,7 +13,7 @@ test_response = file_response(
     url="https://planning.lacity.gov/dcpapi/meetings/api/all/commissions/2024",
 )
 spider = LoscaCityPlanningSpider()
-print(test_response)
+
 freezer = freeze_time("2024-10-21")
 freezer.start()
 
@@ -82,7 +82,7 @@ def test_links():
 
 
 def test_classification():
-    assert parsed_items[0]["classification"] == "Commission"
+    assert parsed_items[0]["classification"] == COMMISSION
 
 
 @pytest.mark.parametrize("item", parsed_items)

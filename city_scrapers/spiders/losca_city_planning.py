@@ -22,15 +22,25 @@ class LoscaCityPlanningSpider(CityScrapersSpider):
         This spider retrieves meetings for the specified `start_year`.
         Update `start_year` to change the target year.
         """
-        data = response.json()
-        items = data["Entries"]
+        try:
+            data = response.json()
+            if "Entries" not in data:
+                self.logger.error("Missing 'Entries' field in response")
+                return
+            items = data["Entries"]
+        except ValueError as e:
+            self.logger.error(f"Failed to parse JSON response: {e}")
+            return
 
         for item in items:
+            if not all(key in item for key in ["Type", "Date", "Address"]):
+                self.logger.warning(f"Skipping item due to missing required fields: {item}")
+                continue
             meeting = Meeting(
-                title=item["Type"],
-                description=item["Note"],
+                title=item.get("Type", ""),
+                description=item.get("Note", ""),
                 classification=self._parse_classification(item),
-                start=parse(item["Date"]),
+                start=parse(item.get("Date")),
                 end=None,
                 all_day=False,
                 time_notes="",
@@ -67,13 +77,10 @@ class LoscaCityPlanningSpider(CityScrapersSpider):
 
     def _parse_classification(self, item):
         lower_text = item["Type"].lower()
-        switch_case = {
-            "board": BOARD,
-            "commission": COMMISSION,
-        }
-        for key, value in switch_case.items():
-            if key in lower_text:
-                return value
+        if "board" in lower_text:
+            return BOARD
+        elif "commission" in lower_text:
+            return COMMISSION
         return NOT_CLASSIFIED
 
     def _parse_source(self, response):
