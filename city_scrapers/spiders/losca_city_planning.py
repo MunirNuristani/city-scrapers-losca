@@ -1,4 +1,3 @@
-import json
 import re
 
 from city_scrapers_core.constants import BOARD, COMMISSION, NOT_CLASSIFIED
@@ -10,19 +9,20 @@ from dateutil.parser import parse
 class LoscaCityPlanningSpider(CityScrapersSpider):
     name = "losca_city_planning"
     agency = "Los Angeles City Planning"
-    timezone = "America/Chicago"
+    timezone = "America/Los_Angeles"
+    start_year = 2024
     start_urls = [
-        "https://planning.lacity.gov/dcpapi/meetings/api/all/commissions/2024",
-        "https://planning.lacity.gov/dcpapi/meetings/api/all/boards/2024",
-        "https://planning.lacity.gov/dcpapi/meetings/api/all/hearings/2024",
+        f"https://planning.lacity.gov/dcpapi/meetings/api/all/commissions/{start_year}",
+        f"https://planning.lacity.gov/dcpapi/meetings/api/all/boards/{start_year}",
+        f"https://planning.lacity.gov/dcpapi/meetings/api/all/hearings/{start_year}",
     ]
 
     def parse(self, response):
         """
-        This spider will get the meetings for the year 2024.
-        for previous years, `start_urls` needs to be changed.
+        This spider retrieves meetings for the specified `start_year`.
+        Update `start_year` to change the target year.
         """
-        data = json.loads(response.body)
+        data = response.json()
         items = data["Entries"]
 
         for item in items:
@@ -48,10 +48,10 @@ class LoscaCityPlanningSpider(CityScrapersSpider):
         """Parse or generate location."""
         pattern = r"(\d{3,4}(?:\s?–\s?\d{3,4})?(?:\s?and\s?\d{3,4})?(?:\s?,?\s?\d{3,4})?\s[\w\s]+\b(?:Road|Drive|Boulevard|Avenue))"
         addresses = re.findall(pattern, item["Address"])
-
+        address = ', '.join(addresses) if addresses else item.get("Address", "")
         return {
-            "address": addresses,
-            "name": item["BoardName"],
+            "address": address,
+            "name": item.get("BoardName", ""),
         }
 
     def _parse_links(self, item):
@@ -59,11 +59,11 @@ class LoscaCityPlanningSpider(CityScrapersSpider):
         links = []
 
         if "AgendaLink" in item and item["AgendaLink"]:
-            links.append({"href": item["AgendaLink"], "title": item["Agenda"]})
+            links.append({"href": item["AgendaLink"], "title": item.get("Agenda", "Agenda")})
         if "AddDocsLink" in item and item["AddDocsLink"]:
-            links.append({"href": item["AddDocsLink"], "title": item["AddDocs"]})
+            links.append({"href": item["AddDocsLink"], "title": item.get("AddDocs", "Additional Documents")})
 
-        return links if links else None
+        return links
 
     def _parse_classification(self, item):
         lower_text = item["Type"].lower()
