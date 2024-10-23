@@ -64,13 +64,24 @@ class LoscaCityPlanningSpider(CityScrapersSpider):
             "name": item.get("BoardName", ""),
         }
 
+    def _validate_url(self, url):
+        """Validate URL format and security."""
+        if not url:
+            return False
+        if not url.startswith('https://'):
+            self.logger.warning(f"Non-HTTPS URL found: {url}")
+            return False
+        return True
+
     def _parse_links(self, item):
         """Parse or generate links."""
         links = []
 
-        if "AgendaLink" in item and item["AgendaLink"]:
+        agenda_link = item.get("AgendaLink")
+        if agenda_link and self._validate_url(agenda_link):
             links.append({"href": item["AgendaLink"], "title": item.get("Agenda", "Agenda")})
-        if "AddDocsLink" in item and item["AddDocsLink"]:
+        docs_link = item.get("AddDocsLink")
+        if docs_link and self._validate_url(docs_link):
             links.append({"href": item["AddDocsLink"], "title": item.get("AddDocs", "Additional Documents")})
 
         return links
